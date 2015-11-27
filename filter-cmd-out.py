@@ -11,7 +11,7 @@ parser.add_argument("index", type=int, help="index")
 parser.add_argument("-c", "--cmdline", dest="cmd", required=True)
 args = parser.parse_args()
 
-print "application command line: ", args.cmd
+#print "application command line: ", args.cmd
 
 retstr = os.popen(args.cmd).read()
 lines = retstr.split("\n")
