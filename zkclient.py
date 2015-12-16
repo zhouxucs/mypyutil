@@ -19,19 +19,24 @@ def get_full_path(path):
     return path
 
 def exec_ls(path = None):
-    if path != None:
-        ls = zkclient.get_children(path)
-    else:
-        ls = zkclient.get_children(current_path)
-    for node in ls:
-        print node
+    try:
+        if path != None:
+            ls = zkclient.get_children(path)
+        else:
+            ls = zkclient.get_children(current_path)
+        for node in ls:
+            print node
+    except kazoo.exceptions.NoNodeError:
+        print "node %s deleted, set current path to '/'" % current_path
+        set_current_path("/")
 
 def exec_pwd(*args):
     print current_path
 
 def exec_help(*args):
+    print "Avaliable commands:"
     for key, value in cmd_map.items():
-        print key
+        print "%10s\t %s" % (key, value[0])
 
 def del_star(full_path, recursive=False):
     child_list = zkclient.get_children(full_path)
@@ -93,15 +98,25 @@ def exec_clear_all(*args):
         return
     del_star("/", recursive=True)
 
-cmd_map = {"ls": exec_ls,
-            "pwd": exec_pwd,
-            "help": exec_help,
-            "del": exec_del,
-            "add": exec_add,
-            "set": exec_set,
-            "cat": exec_cat,
-            "cd": exec_cd,
-            "clear-all": exec_clear_all}
+cmd_ls =        ("Usage: ls                \t ---\t list nodes", exec_ls)
+cmd_pwd =       ("Usage: pwd               \t ---\t show current path", exec_pwd)
+cmd_help =      ("Usage: help              \t ---\t show help", exec_help)
+cmd_del =       ("Usage: delete [-r]       \t ---\t delete a node, '-r' to delete recursivly", exec_del)
+cmd_add =       ("Usage: add <node> [val]  \t ---\t create a node, you may want to add a value too", exec_add)
+cmd_set =       ("Usage: set <node> [val]  \t ---\t set node with new value", exec_set)
+cmd_cat =       ("Usage: cat <node>        \t ---\t show value of node", exec_cat)
+cmd_cd =        ("Usage: cd <path>         \t ---\t change the current directory", exec_cd)
+cmd_clear_all = ("Usage: clear-all         \t ---\t clear all nodes", exec_clear_all)
+
+cmd_map = {"ls": cmd_ls,
+            "pwd": cmd_pwd,
+            "help": cmd_help,
+            "del": cmd_del,
+            "add": cmd_add,
+            "set": cmd_set,
+            "cat": cmd_cat,
+            "cd": cmd_cd,
+            "clear-all": cmd_clear_all}
 
 def exec_command(cmd_line):
     words = cmd_line.split()
@@ -110,7 +125,7 @@ def exec_command(cmd_line):
     if not cmd_map.has_key(cmd):
         print "Command not found!"
         return False
-    cmd_func = cmd_map[cmd]
+    cmd_func = cmd_map[cmd][1]
     cmd_func(*args)
     #print "cmd: %s, args %s" % (cmd, args)
 
