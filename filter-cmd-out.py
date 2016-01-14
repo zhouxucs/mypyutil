@@ -19,6 +19,9 @@ lines = retstr.split("\n")
 filtered_lines = []
 for i in range(1, len(lines)):
 	line = lines[i]
+	line = line.strip()
+	if line == "":
+		continue
 	if line.find(args.filter) != -1:
 		filtered_lines.append(line)
 			
@@ -30,4 +33,4 @@ for line in filtered_lines:
 		if args.index < len(words):
 			print words[args.index]
 		else:
-			print "Not enough words in line for index(%d)" % args.index
+			print "Not enough words in %s for index(%d)" % (line, args.index)
